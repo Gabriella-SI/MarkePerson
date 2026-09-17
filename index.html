@@ -8,7 +8,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,600;0,700;0,800;1,800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -20,11 +20,10 @@
                     colors: {
                         brand: {
                             red: '#FF0B22',
-                            redDark: '#99000F',
-                            redGlow: 'rgba(255, 11, 34, 0.4)',
-                            black: '#050505',
-                            dark: '#0B0B0C',
-                            card: '#121214',
+                            redDark: '#80000B',
+                            black: '#030304',
+                            dark: '#08080A',
+                            card: '#0F0F12',
                             border: 'rgba(255, 255, 255, 0.08)'
                         }
                     },
@@ -37,59 +36,90 @@
         }
     </script>
     
-    <!-- Lucide Icons CDN -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- GSAP CDN -->
+    <!-- Three.js CDN para Background 3D Interativo -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <!-- GSAP + ScrollTrigger para Animações Ultra Fluídas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <style>
-        /* CSS Customizado para Interatividade e Efeitos Visuais */
         body {
-            background-color: #050505;
+            background-color: #030304;
             color: #FFFFFF;
             overflow-x: hidden;
+            cursor: default;
         }
 
-        /* Efeito de Ruído Fino / Film Grain */
-        .bg-grain {
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.025'/%3E%3C/svg%3E");
+        /* Canvas 3D de Fundo Fixado */
+        #webgl-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
         }
 
-        /* Glassmorphism Específico */
-        .glass-pill {
-            background: rgba(15, 15, 18, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Glassmorphism de Alta Definição */
+        .ultra-glass {
+            background: rgba(12, 12, 15, 0.55);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        .glass-card {
-            background: rgba(18, 18, 20, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
+        /* Card Interativo com Efeito de Luz Interna Dinâmica */
+        .tilt-card {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+            overflow: hidden;
         }
 
-        .glass-card-hover {
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .tilt-card::before {
+            content: '';
+            position: absolute;
+            top: var(--mouse-y, 50%);
+            left: var(--mouse-x, 50%);
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 11, 34, 0.25) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1;
         }
 
-        .glass-card-hover:hover {
-            border-color: rgba(255, 11, 34, 0.4);
-            box-shadow: 0 0 30px rgba(255, 11, 34, 0.15);
-            transform: translateY(-4px);
+        .tilt-card:hover::before {
+            opacity: 1;
         }
 
-        /* Animação Glow Pulsante */
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 0.6; transform: scale(1.08); }
+        .tilt-card:hover {
+            border-color: rgba(255, 11, 34, 0.5);
+            box-shadow: 0 0 35px rgba(255, 11, 34, 0.2);
         }
 
-        .animate-glow {
-            animation: pulseGlow 6s ease-in-out infinite;
+        /* Marquee Infinito */
+        @keyframes marquee {
+            0% { transform: translateX(0%); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .animate-marquee {
+            display: flex;
+            width: 200%;
+            animation: marquee 25s linear infinite;
+        }
+
+        .animate-marquee:hover {
+            animation-play-state: paused;
         }
 
         /* Custom Scrollbar */
@@ -97,7 +127,7 @@
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #050505;
+            background: #030304;
         }
         ::-webkit-scrollbar-thumb {
             background: #222;
@@ -106,55 +136,19 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #FF0B22;
         }
-
-        /* Efeito de Reflexo Espelhado */
-        .mirror-reflection {
-            position: relative;
-            overflow: hidden;
-        }
-        .mirror-reflection::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 45%,
-                rgba(255, 255, 255, 0.05) 50%,
-                transparent 55%
-            );
-            transform: rotate(30deg);
-            pointer-events: none;
-            transition: transform 0.8s ease;
-        }
-        .mirror-reflection:hover::before {
-            transform: rotate(30deg) translate(20%, 20%);
-        }
-
-        /* Esconder Scrollbar Horizontal para Carrossel */
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
     </style>
 </head>
-<body class="font-sans antialiased bg-grain selection:bg-brand-red selection:text-white">
+<body class="font-sans antialiased selection:bg-brand-red selection:text-white">
 
-    <!-- Canvas para Partículas Interativas de Fundo -->
-    <canvas id="hero-canvas" class="fixed inset-0 pointer-events-none z-0 opacity-40"></canvas>
+    <!-- CANVAS THREE.JS DE FUNDO (PARTÍCULAS & MALHA 3D) -->
+    <canvas id="webgl-bg"></canvas>
 
-    <!-- HEADER / NAVEGAÇÃO FLUTUANTE -->
-    <header class="fixed top-0 left-0 w-full z-50 pt-4 md:pt-6 px-4 transition-all duration-300" id="main-header">
-        <div class="max-w-6xl mx-auto flex items-center justify-between glass-pill rounded-full px-6 py-3 border border-white/10 shadow-2xl transition-all duration-300" id="header-container">
+    <!-- HEADER FLUTUANTE ULTRA MODERNO -->
+    <header class="fixed top-0 left-0 w-full z-50 pt-4 px-4 transition-all duration-300">
+        <div class="max-w-6xl mx-auto flex items-center justify-between ultra-glass rounded-full px-6 py-3 transition-all duration-300" id="nav-container">
             
-            <!-- Logo MarkePerson -->
             <a href="#" class="flex items-center gap-2 group">
-                <div class="w-8 h-8 rounded-lg bg-brand-red flex items-center justify-center font-display font-extrabold text-black text-lg tracking-tighter group-hover:scale-105 transition-transform">
+                <div class="w-8 h-8 rounded-xl bg-brand-red flex items-center justify-center font-display font-black text-black text-lg tracking-tighter group-hover:rotate-12 transition-transform">
                     M
                 </div>
                 <span class="font-display font-bold text-xl tracking-wider text-white">
@@ -162,203 +156,155 @@
                 </span>
             </a>
 
-            <!-- Menu Desktop -->
-            <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-300">
+            <nav class="hidden md:flex items-center gap-8 text-xs font-mono tracking-widest uppercase text-neutral-400">
                 <a href="#inicio" class="hover:text-brand-red transition-colors">Início</a>
-                <a href="#solucoes" class="hover:text-brand-red transition-colors">Soluções</a>
+                <a href="#solucoes" class="hover:text-brand-red transition-colors">Ecossistema</a>
+                <a href="#simulador" class="hover:text-brand-red transition-colors">Simulador</a>
                 <a href="#resultados" class="hover:text-brand-red transition-colors">Resultados</a>
-                <a href="#sobre" class="hover:text-brand-red transition-colors">Sobre nós</a>
                 <a href="#contato" class="hover:text-brand-red transition-colors">Contato</a>
             </nav>
 
-            <!-- Botão Header -->
-            <div class="hidden md:flex items-center">
-                <a href="#contato" class="relative group overflow-hidden rounded-full bg-brand-red px-6 py-2.5 text-xs uppercase font-bold tracking-widest text-white transition-all duration-300 hover:bg-white hover:text-black hover:shadow-[0_0_20px_rgba(255,11,34,0.6)]">
-                    <span class="relative z-10 flex items-center gap-2">
-                        Quero crescer <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
-                    </span>
-                </a>
-            </div>
-
-            <!-- Botão Mobile Menu Toggle -->
-            <button class="md:hidden text-white p-2 focus:outline-none" id="mobile-menu-btn" aria-label="Abrir Menu">
-                <i data-lucide="menu" class="w-6 h-6" id="menu-icon"></i>
-            </button>
-        </div>
-
-        <!-- Menu Fullscreen Mobile -->
-        <div id="mobile-menu" class="fixed inset-0 bg-brand-black/95 backdrop-blur-2xl z-40 hidden flex-col justify-center px-8 space-y-6 text-2xl font-display font-bold text-center md:hidden transition-all duration-300 opacity-0">
-            <a href="#inicio" class="mobile-link text-white hover:text-brand-red py-2 border-b border-white/5">Início</a>
-            <a href="#solucoes" class="mobile-link text-white hover:text-brand-red py-2 border-b border-white/5">Soluções</a>
-            <a href="#resultados" class="mobile-link text-white hover:text-brand-red py-2 border-b border-white/5">Resultados</a>
-            <a href="#sobre" class="mobile-link text-white hover:text-brand-red py-2 border-b border-white/5">Sobre nós</a>
-            <a href="#contato" class="mobile-link text-white hover:text-brand-red py-2 border-b border-white/5">Contato</a>
-            <a href="#contato" class="mobile-link mt-4 inline-flex items-center justify-center gap-2 bg-brand-red text-white py-4 rounded-full text-base font-bold uppercase tracking-wider">
-                Quero crescer <i data-lucide="arrow-up-right" class="w-5 h-5"></i>
+            <a href="#contato" class="hidden md:inline-flex items-center gap-2 bg-brand-red hover:bg-white text-white hover:text-black text-xs font-bold uppercase tracking-wider px-6 py-2.5 rounded-full transition-all duration-300 shadow-[0_0_20px_rgba(255,11,34,0.4)]">
+                Quero Crescer <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
             </a>
+
+            <button class="md:hidden text-white" id="mobile-toggle">
+                <i data-lucide="menu" class="w-6 h-6"></i>
+            </button>
         </div>
     </header>
 
-    <!-- HERO SECTION -->
-    <section id="inicio" class="relative min-h-screen pt-32 pb-20 flex items-center justify-center overflow-hidden z-10">
-        
-        <!-- Luzes e Auras de Fundo -->
-        <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-brand-red/20 rounded-full blur-[140px] pointer-events-none animate-glow"></div>
-        <div class="absolute bottom-10 right-10 w-[300px] h-[300px] bg-brand-red/10 rounded-full blur-[100px] pointer-events-none"></div>
-
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative w-full">
+    <!-- HERO SECTION — IMPACTO VISUAL 3D IMEDIATO -->
+    <section id="inicio" class="relative min-h-screen pt-36 pb-20 flex items-center justify-center z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
                 
-                <!-- Lado Esquerdo: Tipografia e Copy Dominante -->
-                <div class="lg:col-span-8 space-y-8 text-left z-20">
-                    <div class="inline-flex items-center gap-3 px-4 py-1.5 rounded-full glass-card border border-brand-red/30 text-xs font-mono tracking-wider uppercase text-neutral-300">
+                <!-- Coluna Esquerda: Texto Principal -->
+                <div class="lg:col-span-7 space-y-8">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full ultra-glass border border-brand-red/30 text-xs font-mono uppercase tracking-widest text-brand-red">
                         <span class="w-2 h-2 rounded-full bg-brand-red animate-ping"></span>
-                        Agência de Performance & Posicionamento
+                        Engenharia de Performance Digital
                     </div>
 
-                    <h1 class="text-4xl sm:text-6xl md:text-7xl xl:text-8xl font-display font-extrabold tracking-tight leading-[0.95] text-white">
-                        MARKETING QUE <br>
-                        FAZ SEU NEGÓCIO <br>
-                        SER <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-red via-red-500 to-white relative inline-block">
-                            PERCEBIDO.
-                            <svg class="absolute -bottom-2 left-0 w-full h-3 text-brand-red opacity-80" viewBox="0 0 100 20" preserveAspectRatio="none">
-                                <path d="M0 15 Q 50 0 100 15" stroke="currentColor" stroke-width="4" fill="transparent"/>
-                            </svg>
-                        </span>
+                    <h1 class="text-5xl sm:text-7xl xl:text-8xl font-display font-black tracking-tight leading-[0.92] text-white">
+                        MARKETING <br>
+                        QUE FAZ VOCÊ <br>
+                        SER <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-red via-red-500 to-white">PERCEBIDO.</span>
                     </h1>
 
-                    <p class="text-lg sm:text-xl text-neutral-400 max-w-2xl font-light leading-relaxed">
-                        Estratégia, criatividade e alta performance para transformar atenção volátil em receita e oportunidades reais de crescimento para o seu negócio.
+                    <p class="text-lg sm:text-xl text-neutral-400 font-light max-w-xl leading-relaxed">
+                        Esqueça postagens genéricas. Construímos ecossistemas digitais agressivos para dominar a atenção do seu mercado e escalar vendas.
                     </p>
 
-                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
-                        <a href="#contato" class="group inline-flex items-center justify-center gap-3 bg-brand-red hover:bg-white text-white hover:text-black font-bold text-sm tracking-wider uppercase px-8 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(255,11,34,0.4)] hover:shadow-[0_0_40px_rgba(255,255,255,0.6)]">
-                            Quero crescer
-                            <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-1 transition-transform"></i>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                        <a href="#contato" class="inline-flex items-center justify-center gap-3 bg-brand-red hover:bg-white text-white hover:text-black font-extrabold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300 shadow-[0_0_30px_rgba(255,11,34,0.5)] hover:scale-105">
+                            Dominar Meu Mercado
+                            <i data-lucide="zap" class="w-4 h-4"></i>
                         </a>
-                        <a href="#solucoes" class="inline-flex items-center justify-center gap-3 glass-card hover:bg-white/10 text-white font-semibold text-sm tracking-wider px-8 py-4 rounded-full border border-white/15 transition-all">
-                            Conhecer a MarkePerson
+                        <a href="#simulador" class="inline-flex items-center justify-center gap-2 ultra-glass hover:bg-white/10 text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all">
+                            Simular Retorno
                         </a>
-                    </div>
-
-                    <!-- Indicadores Rápidos -->
-                    <div class="pt-8 grid grid-cols-3 gap-6 border-t border-white/10 max-w-lg">
-                        <div>
-                            <div class="text-2xl sm:text-3xl font-display font-bold text-white">+7 Dígitos</div>
-                            <div class="text-xs text-neutral-500 uppercase tracking-widest mt-1">Geridos em Anúncios</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl sm:text-3xl font-display font-bold text-white">+20/dia</div>
-                            <div class="text-xs text-neutral-500 uppercase tracking-widest mt-1">Leads Qualificados</div>
-                        </div>
-                        <div>
-                            <div class="text-2xl sm:text-3xl font-display font-bold text-white">100%</div>
-                            <div class="text-xs text-neutral-500 uppercase tracking-widest mt-1">Orientado a Dados</div>
-                        </div>
                     </div>
                 </div>
 
-                <!-- Lado Direito: Composição de Cards Flutuantes 3D e Parallax -->
-                <div class="lg:col-span-4 relative min-h-[420px] flex items-center justify-center" id="hero-interactive-zone">
-                    
-                    <!-- Card Central de Gráfico Futurista -->
-                    <div class="w-full glass-card p-6 rounded-2xl border border-white/10 shadow-2xl relative z-20 backdrop-blur-xl mirror-reflection transform transition-transform hover:scale-105 duration-500">
-                        <div class="flex items-center justify-between mb-4">
+                <!-- Coluna Direita: Dashboard Interativo & Card Flutuante 3D -->
+                <div class="lg:col-span-5 relative" id="hero-3d-wrapper">
+                    <div class="tilt-card ultra-glass p-8 rounded-3xl border border-white/10 relative z-20 shadow-2xl">
+                        
+                        <div class="flex items-center justify-between mb-6">
                             <div class="flex items-center gap-3">
                                 <div class="w-3 h-3 rounded-full bg-brand-red animate-pulse"></div>
-                                <span class="text-xs font-mono text-neutral-400 uppercase tracking-wider">Demanda Ativa — Live</span>
+                                <span class="text-xs font-mono text-neutral-400 uppercase">Tráfego Ativo em Tempo Real</span>
                             </div>
-                            <span class="text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">+148% ROI</span>
+                            <span class="text-[10px] font-mono text-emerald-400 bg-emerald-950/80 px-2.5 py-1 rounded-full border border-emerald-500/30">+342% ROI</span>
                         </div>
-                        
-                        <div class="space-y-3">
-                            <div class="text-3xl font-display font-bold text-white">R$ 1.420.800</div>
-                            <div class="text-xs text-neutral-400">Pipeline Gerado em 2026</div>
-                            <!-- Gráfico SVG Vetorial -->
-                            <div class="h-24 w-full pt-2">
-                                <svg class="w-full h-full overflow-visible" viewBox="0 0 300 80">
-                                    <defs>
-                                        <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                            <stop offset="0%" stop-color="#FF0B22" stop-opacity="0.6"/>
-                                            <stop offset="100%" stop-color="#FF0B22" stop-opacity="0"/>
-                                        </linearGradient>
-                                    </defs>
-                                    <path d="M 0 60 Q 50 50, 100 35 T 200 25 T 300 5 L 300 80 L 0 80 Z" fill="url(#grad)" />
-                                    <path d="M 0 60 Q 50 50, 100 35 T 200 25 T 300 5" fill="none" stroke="#FF0B22" stroke-width="3" />
-                                    <circle cx="300" cy="5" r="4" fill="#FFFFFF" class="animate-ping" />
-                                </svg>
+
+                        <!-- Mini Gráfico de Barras Animado -->
+                        <div class="space-y-2 mb-6">
+                            <div class="text-3xl font-display font-black text-white">R$ 2.840.000,00</div>
+                            <div class="text-xs text-neutral-500 font-mono">VALOR GERADO PARA CLIENTES</div>
+                        </div>
+
+                        <div class="h-32 flex items-end gap-2 pt-4 border-t border-white/10">
+                            <div class="flex-1 bg-brand-red/20 hover:bg-brand-red h-[40%] rounded-t-lg transition-all duration-300"></div>
+                            <div class="flex-1 bg-brand-red/20 hover:bg-brand-red h-[60%] rounded-t-lg transition-all duration-300"></div>
+                            <div class="flex-1 bg-brand-red/20 hover:bg-brand-red h-[45%] rounded-t-lg transition-all duration-300"></div>
+                            <div class="flex-1 bg-brand-red/20 hover:bg-brand-red h-[80%] rounded-t-lg transition-all duration-300"></div>
+                            <div class="flex-1 bg-brand-red h-[100%] rounded-t-lg shadow-[0_0_15px_rgba(255,11,34,0.8)]"></div>
+                        </div>
+
+                        <!-- Card Flutuante Secundário Sobreposto -->
+                        <div class="absolute -bottom-6 -left-8 ultra-glass p-4 rounded-2xl border border-brand-red/40 flex items-center gap-4 shadow-2xl animate-bounce [animation-duration:6s]">
+                            <div class="w-10 h-10 rounded-xl bg-brand-red/20 border border-brand-red flex items-center justify-center text-brand-red">
+                                <i data-lucide="trending-up" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-mono text-neutral-400">Leads Qualificados</div>
+                                <div class="text-sm font-bold text-white">+20 Pacientes/Dia</div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Elements Flutuantes Parallax (Decorativos em Absoluto) -->
-                    <!-- Floating Pill 1: Notificação de Pacientes/Clientes -->
-                    <div class="absolute -top-6 -left-8 glass-card p-4 rounded-xl border border-brand-red/30 shadow-2xl z-30 flex items-center gap-3 animate-bounce [animation-duration:5s]">
-                        <div class="w-10 h-10 rounded-full bg-brand-red/20 border border-brand-red flex items-center justify-center text-brand-red">
-                            <i data-lucide="user-plus" class="w-5 h-5"></i>
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-white">+20 Pacientes</div>
-                            <div class="text-[10px] text-neutral-400 font-mono">Agendados Hoje</div>
-                        </div>
                     </div>
-
-                    <!-- Floating Pill 2: Tráfego Pago Tag -->
-                    <div class="absolute -bottom-6 -right-6 glass-card px-5 py-3 rounded-xl border border-white/10 z-30 flex items-center gap-3">
-                        <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
-                        <span class="text-xs font-mono font-bold tracking-widest text-neutral-200">TRÁFEGO PAGO</span>
-                    </div>
-
-                    <!-- Floating Pill 3: Estratégia -->
-                    <div class="absolute top-1/2 -right-10 -translate-y-1/2 glass-card p-3 rounded-lg border border-white/10 z-10 hidden sm:block">
-                        <div class="text-[10px] font-mono text-neutral-500 uppercase">Status</div>
-                        <div class="text-xs font-bold text-brand-red flex items-center gap-1">
-                            <i data-lucide="zap" class="w-3 h-3"></i> ALTA PERFORMANCE
-                        </div>
-                    </div>
-
                 </div>
 
             </div>
         </div>
     </section>
 
-    <!-- SEÇÃO "O PROBLEMA" (Editorial / Tipografia Gigante com Scroll Reveal) -->
-    <section class="py-28 relative border-t border-white/10 bg-brand-dark/50" id="problema">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- MARQUEE INFINITO (FAIXA DE PALAVRAS CHAVE EM MOVIMENTO) -->
+    <div class="py-6 border-y border-white/10 bg-brand-dark/80 overflow-hidden relative z-10">
+        <div class="animate-marquee whitespace-nowrap flex items-center gap-12 font-display font-black text-xl sm:text-2xl text-neutral-600 tracking-widest uppercase">
+            <span>• ESTRATÉGIA B2B</span>
+            <span class="text-brand-red">• TRÁFEGO PAGO DE ALTA PERFORMANCE</span>
+            <span>• POSICIONAMENTO PREMIUM</span>
+            <span class="text-white">• CONVERSÃO DE ANÚNCIOS</span>
+            <span>• SOCIAL MEDIA ESTRATÉGICO</span>
+            <span>• ESTRATÉGIA B2B</span>
+            <span class="text-brand-red">• TRÁFEGO PAGO DE ALTA PERFORMANCE</span>
+            <span>• POSICIONAMENTO PREMIUM</span>
+            <span class="text-white">• CONVERSÃO DE ANÚNCIOS</span>
+            <span>• SOCIAL MEDIA ESTRATÉGICO</span>
+        </div>
+    </div>
+
+    <!-- SEÇÃO INTERATIVA: SIMULADOR DE ROI / POTENCIAL DE CRESCIMENTO -->
+    <section id="simulador" class="py-28 relative z-10">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <span class="text-xs font-mono uppercase tracking-widest text-brand-red mb-3 block">[ Diagnóstico Comercial ]</span>
-                <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white leading-tight">
-                    SEU MARKETING ESTÁ TRABALHANDO OU APENAS POSTANDO?
-                </h2>
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-xs font-mono uppercase tracking-widest text-brand-red block mb-2">// Calculadora de Impacto</span>
+                <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white">SIMULE SEU POTENCIAL DE ESCALA</h2>
+                <p class="text-neutral-400 text-sm mt-3">Ajuste os valores abaixo para ver a estimativa de retorno com a estratégia da MarkePerson.</p>
             </div>
 
-            <!-- Frases de Impacto Visual com Animação no Scroll -->
-            <div class="space-y-6 max-w-4xl mx-auto">
+            <div class="tilt-card ultra-glass p-8 sm:p-12 rounded-3xl border border-white/10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                 
-                <div class="scroll-reveal-item glass-card p-8 rounded-2xl border-l-4 border-l-brand-red border-y border-r border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
-                    <span class="text-3xl sm:text-4xl font-display font-extrabold text-white">01. Postar não é estratégia.</span>
-                    <p class="text-neutral-400 text-sm max-w-xs">A frequência sem direcionamento claro cria apenas ruído digital, não novos clientes.</p>
-                </div>
-
-                <div class="scroll-reveal-item glass-card p-8 rounded-2xl border-l-4 border-l-neutral-700 border-y border-r border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
-                    <span class="text-3xl sm:text-4xl font-display font-extrabold text-white">02. Alcance não é resultado.</span>
-                    <p class="text-neutral-400 text-sm max-w-xs">Milhares de visualizações desqualificadas não se convertem em reuniões nem em vendas.</p>
-                </div>
-
-                <div class="scroll-reveal-item glass-card p-8 rounded-2xl border-l-4 border-l-neutral-700 border-y border-r border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
-                    <span class="text-3xl sm:text-4xl font-display font-extrabold text-white">03. Curtida não paga boleto.</span>
-                    <p class="text-neutral-400 text-sm max-w-xs">Métricas de vaidade iludem. Seu negócio precisa de um funil previsível de faturamento.</p>
-                </div>
-
-                <div class="scroll-reveal-item glass-card p-8 rounded-2xl border-l-4 border-l-brand-red bg-gradient-to-r from-brand-red/10 to-transparent border-y border-r border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 transition-all">
+                <!-- Sliders Interativos -->
+                <div class="space-y-8">
                     <div>
-                        <span class="text-3xl sm:text-4xl font-display font-extrabold text-white">04. Você precisa ser PERCEBIDO.</span>
-                        <p class="text-brand-red font-mono text-xs uppercase tracking-widest mt-1">O posicionamento correto atrai o cliente certo.</p>
+                        <div class="flex justify-between text-xs font-mono mb-2">
+                            <span class="text-neutral-400">INVESTIMENTO MENSAL EM MÍDIA</span>
+                            <span class="text-brand-red font-bold" id="inv-val">R$ 5.000</span>
+                        </div>
+                        <input type="range" id="inv-range" min="2000" max="50000" step="1000" value="5000" class="w-full accent-brand-red bg-neutral-800 rounded-lg h-2 cursor-pointer">
                     </div>
-                    <a href="#contato" class="inline-flex items-center gap-2 text-xs uppercase font-bold text-white bg-brand-red px-5 py-3 rounded-full hover:bg-white hover:text-black transition-colors whitespace-nowrap">
-                        Mudar esse cenário
+
+                    <div>
+                        <div class="flex justify-between text-xs font-mono mb-2">
+                            <span class="text-neutral-400">TICKET MÉDIO DO SEU SERVIÇO</span>
+                            <span class="text-brand-red font-bold" id="ticket-val">R$ 1.500</span>
+                        </div>
+                        <input type="range" id="ticket-range" min="200" max="10000" step="100" value="1500" class="w-full accent-brand-red bg-neutral-800 rounded-lg h-2 cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Resultado Calculado em Tempo Real -->
+                <div class="bg-brand-black/80 p-8 rounded-2xl border border-brand-red/30 text-center space-y-4">
+                    <span class="text-xs font-mono uppercase tracking-widest text-neutral-500">Estimativa Mensal de Vendas/Oportunidades</span>
+                    <div class="text-4xl sm:text-5xl font-display font-black text-brand-red" id="est-faturamento">R$ 22.500,00</div>
+                    <div class="text-xs text-neutral-400 font-mono" id="est-leads">Aproximadamente 15 novos clientes fechados/mês</div>
+                    <a href="#contato" class="inline-block w-full py-3 rounded-full bg-brand-red text-white text-xs font-bold uppercase tracking-wider hover:bg-white hover:text-black transition-colors">
+                        Quero Alcançar Esse Resultado
                     </a>
                 </div>
 
@@ -367,118 +313,71 @@
         </div>
     </section>
 
-    <!-- SEÇÃO SOLUÇÕES — ECOSSISTEMA DE MARKETING (Grid Assimétrico com Cards Interativos) -->
-    <section class="py-32 relative" id="solucoes">
+    <!-- SEÇÃO ECOSSISTEMA DE SOLUÇÕES (CARDS INTERATIVOS 3D) -->
+    <section id="solucoes" class="py-28 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                 <div>
-                    <span class="text-xs font-mono uppercase tracking-widest text-brand-red mb-2 block">// Soluções Especializadas</span>
-                    <h2 class="text-4xl sm:text-6xl font-display font-extrabold text-white">
-                        UM ECOSSISTEMA <br>DE MARKETING.
-                    </h2>
+                    <span class="text-xs font-mono uppercase tracking-widest text-brand-red block mb-2">// Engenharia Comercial</span>
+                    <h2 class="text-4xl sm:text-6xl font-display font-black text-white">UM ECOSSISTEMA <br>DE PERFORMANCE.</h2>
                 </div>
-                <p class="text-neutral-400 max-w-md text-sm font-light">
-                    Soluções modulares e integradas construídas para dominar todas as etapas da jornada da atenção até a conversão final.
-                </p>
             </div>
 
-            <!-- Grid de Cards Diferenciados (Layout Assimétrico) -->
+            <!-- Grid de Cards Interativos -->
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                 
-                <!-- CARD 1: Tráfego Pago (Grande Bloco Preto com Número Gigante) -->
-                <div class="md:col-span-7 glass-card p-8 sm:p-10 rounded-3xl border border-white/10 glass-card-hover relative overflow-hidden group">
-                    <div class="absolute top-4 right-6 text-7xl font-display font-black text-white/5 group-hover:text-brand-red/10 transition-colors pointer-events-none">01</div>
-                    <div class="w-12 h-12 rounded-2xl bg-brand-red/10 border border-brand-red/30 flex items-center justify-center text-brand-red mb-6">
-                        <i data-lucide="target" class="w-6 h-6"></i>
+                <div class="md:col-span-8 tilt-card ultra-glass p-8 sm:p-10 rounded-3xl border border-white/10 flex flex-col justify-between">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-brand-red/10 border border-brand-red/30 flex items-center justify-center text-brand-red mb-6">
+                            <i data-lucide="target" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold text-white mb-3">01. TRÁFEGO PAGO DE ALTA DENSIDADE</h3>
+                        <p class="text-neutral-400 text-sm leading-relaxed max-w-xl">
+                            Configuração de funis avançados em Meta Ads e Google Ads. Direcionamos seus anúncios diretamente para quem tem dinheiro e intenção imediata de compra.
+                        </p>
                     </div>
-                    <div class="w-12 h-1 bg-brand-red mb-6"></div>
-                    <h3 class="text-2xl font-display font-bold text-white mb-3">TRÁFEGO PAGO</h3>
-                    <p class="text-neutral-400 text-sm leading-relaxed mb-6">
-                        Campanhas ultra-segmentadas nas redes (Meta Ads, Google Ads) desenhadas para gerar demanda reprimida e atrair oportunidades prontas para fechamento de contrato.
-                    </p>
-                    <div class="flex items-center gap-2 text-xs font-mono text-brand-red group-hover:translate-x-2 transition-transform">
-                        <span>Acelerar Aquisição</span> <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    <div class="mt-8 flex items-center gap-3 text-xs font-mono text-brand-red">
+                        <span class="w-2 h-2 rounded-full bg-brand-red animate-ping"></span>
+                        Otimização Algorítmica Diária
                     </div>
                 </div>
 
-                <!-- CARD 2: Social Media (Card Vermelho Intenso) -->
-                <div class="md:col-span-5 bg-gradient-to-br from-brand-red to-brand-redDark p-8 sm:p-10 rounded-3xl text-white relative overflow-hidden shadow-2xl group transition-all duration-300 hover:scale-[1.02]">
-                    <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-black/20 rounded-full blur-2xl pointer-events-none"></div>
-                    <div class="w-12 h-12 rounded-2xl bg-black/20 border border-white/20 flex items-center justify-center text-white mb-6">
-                        <i data-lucide="share-2" class="w-6 h-6"></i>
+                <div class="md:col-span-4 tilt-card bg-gradient-to-br from-brand-red to-brand-redDark p-8 sm:p-10 rounded-3xl text-white flex flex-col justify-between shadow-2xl">
+                    <div>
+                        <div class="w-12 h-12 rounded-2xl bg-black/20 border border-white/20 flex items-center justify-center text-white mb-6">
+                            <i data-lucide="star" class="w-6 h-6"></i>
+                        </div>
+                        <h3 class="text-2xl font-display font-bold mb-3">02. SOCIAL MEDIA STRATEGIC</h3>
+                        <p class="text-white/80 text-sm leading-relaxed">
+                            Criação de autoridade. Seu perfil deixa de parecer amador e se torna uma vitrine que transmite alto valor.
+                        </p>
                     </div>
-                    <h3 class="text-2xl font-display font-bold text-white mb-3">SOCIAL MEDIA</h3>
-                    <p class="text-white/80 text-sm leading-relaxed mb-6">
-                        Conteúdo estratégico para posicionar sua marca, gerar autoridade inquestionável e manter o seu ecossistema aquecido.
-                    </p>
-                    <span class="inline-block px-4 py-1.5 rounded-full bg-black/30 text-xs font-mono border border-white/20">Autoridade Ativa</span>
+                    <span class="inline-block mt-8 px-4 py-1.5 rounded-full bg-black/30 text-xs font-mono border border-white/20 text-center">Autoridade Implacável</span>
                 </div>
 
-                <!-- CARD 3: Estratégia (Card Espelhado Transparente com Dashboard) -->
-                <div class="md:col-span-4 glass-card p-8 rounded-3xl border border-white/10 glass-card-hover mirror-reflection">
-                    <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6">
+                <div class="md:col-span-4 tilt-card ultra-glass p-8 rounded-3xl border border-white/10">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-4">
                         <i data-lucide="compass" class="w-5 h-5"></i>
                     </div>
-                    <h3 class="text-xl font-display font-bold text-white mb-2">ESTRATÉGIA</h3>
-                    <p class="text-neutral-400 text-xs leading-relaxed mb-4">
-                        Planejamento completo orientado a objetivos de negócio e análise profunda de dados da concorrência.
-                    </p>
-                    <div class="p-3 rounded-xl bg-black/40 border border-white/5 text-[11px] font-mono text-neutral-300 flex justify-between">
-                        <span>Análise de Funil</span>
-                        <span class="text-brand-red">Otimizado</span>
-                    </div>
+                    <h3 class="text-lg font-display font-bold text-white mb-2">03. ESTRATÉGIA B2B</h3>
+                    <p class="text-neutral-400 text-xs">Planejamento focado em fechar contratos de alto ticket com tomadores de decisão.</p>
                 </div>
 
-                <!-- CARD 4: Conteúdo (Vertical com Frase de Impacto) -->
-                <div class="md:col-span-4 glass-card p-8 rounded-3xl border border-white/10 glass-card-hover flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6">
-                            <i data-lucide="video" class="w-5 h-5"></i>
-                        </div>
-                        <h3 class="text-xl font-display font-bold text-white mb-2">CONTEÚDO</h3>
-                        <p class="text-neutral-400 text-xs leading-relaxed">
-                            Criativos magnéticos, roteiros dinâmicos e vídeos produzidos especificamente para prender a atenção em até 3 segundos.
-                        </p>
+                <div class="md:col-span-4 tilt-card ultra-glass p-8 rounded-3xl border border-white/10">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-4">
+                        <i data-lucide="video" class="w-5 h-5"></i>
                     </div>
-                    <div class="mt-6 pt-4 border-t border-white/10 text-xs text-neutral-500 italic">
-                        "Atenção é a moeda mais valiosa do mercado."
-                    </div>
+                    <h3 class="text-lg font-display font-bold text-white mb-2">04. CONTEÚDO MAGNÉTICO</h3>
+                    <p class="text-neutral-400 text-xs">Roteiros e criativos em vídeo desenhados para capturar a atenção nos primeiros 3 segundos.</p>
                 </div>
 
-                <!-- CARD 5: Posicionamento (Horizontal Longo) -->
-                <div class="md:col-span-4 glass-card p-8 rounded-3xl border border-white/10 glass-card-hover flex flex-col justify-between">
-                    <div>
-                        <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-6">
-                            <i data-lucide="award" class="w-5 h-5"></i>
-                        </div>
-                        <h3 class="text-xl font-display font-bold text-white mb-2">POSICIONAMENTO</h3>
-                        <p class="text-neutral-400 text-xs leading-relaxed">
-                            Construção de uma identidade e presença digital inesquecível, tornando o seu negócio a única escolha óbvia.
-                        </p>
+                <div class="md:col-span-4 tilt-card ultra-glass p-8 rounded-3xl border border-white/10">
+                    <div class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white mb-4">
+                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
                     </div>
-                    <div class="mt-4 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-brand-red"></span>
-                        <span class="text-[10px] font-mono uppercase text-neutral-400">Diferenciação Premium</span>
-                    </div>
-                </div>
-
-                <!-- CARD 6: Performance (Card Estilo Dashboard Interativo) -->
-                <div class="md:col-span-12 glass-card p-8 rounded-3xl border border-white/10 glass-card-hover flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div class="flex items-center gap-6">
-                        <div class="w-14 h-14 rounded-2xl bg-brand-red/10 border border-brand-red/30 flex items-center justify-center text-brand-red shrink-0">
-                            <i data-lucide="bar-chart-3" class="w-7 h-7"></i>
-                        </div>
-                        <div>
-                            <h3 class="text-2xl font-display font-bold text-white">PERFORMANCE & OTIMIZAÇÃO</h3>
-                            <p class="text-neutral-400 text-sm max-w-xl">
-                                Leitura diária de dados e testes A/B contínuos para garantir o menor custo por aquisição (CPA) e o maior retorno sobre investimento.
-                            </p>
-                        </div>
-                    </div>
-                    <a href="#contato" class="shrink-0 bg-white hover:bg-brand-red hover:text-white text-black font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-full transition-all duration-300">
-                        Analisar Meu Projeto
-                    </a>
+                    <h3 class="text-lg font-display font-bold text-white mb-2">05. PERFORMANCE & ROI</h3>
+                    <p class="text-neutral-400 text-xs">Análise fria de métricas para garantir que cada real investido traga retorno multiplicador.</p>
                 </div>
 
             </div>
@@ -486,471 +385,184 @@
         </div>
     </section>
 
-    <!-- SEÇÃO HORIZONTAL / SCROLL LATERAL (Jornada da Estratégia) -->
-    <section class="py-24 border-y border-white/10 bg-brand-dark/30 overflow-hidden" id="jornada">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
-            <span class="text-xs font-mono uppercase tracking-widest text-brand-red block">// A Jornada da Percepção</span>
-            <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white mt-1">
-                DO PRIMEIRO OLHAR AO PRIMEIRO RESULTADO.
-            </h2>
-        </div>
-
-        <!-- Carrossel Deslizante Horizontal -->
-        <div class="flex gap-6 overflow-x-auto no-scrollbar px-4 sm:px-8 md:px-16 pb-8 snap-x snap-mandatory" id="horizontal-scroll-container">
-            
-            <!-- Etapa 1 -->
-            <div class="snap-center shrink-0 w-[280px] sm:w-[340px] glass-card p-8 rounded-2xl border border-white/10 relative">
-                <span class="text-xs font-mono text-brand-red font-bold">FASE 01</span>
-                <h3 class="text-2xl font-display font-bold text-white my-3">ESTRATÉGIA</h3>
-                <p class="text-neutral-400 text-sm">Mapeamento de público-alvo, benchmarking e definição das metas do funil comercial.</p>
-                <div class="mt-6 pt-4 border-t border-white/5 text-right font-mono text-xs text-neutral-600">01 / 05</div>
-            </div>
-
-            <!-- Etapa 2 -->
-            <div class="snap-center shrink-0 w-[280px] sm:w-[340px] glass-card p-8 rounded-2xl border border-white/10 relative">
-                <span class="text-xs font-mono text-brand-red font-bold">FASE 02</span>
-                <h3 class="text-2xl font-display font-bold text-white my-3">CONTEÚDO</h3>
-                <p class="text-neutral-400 text-sm">Produção dos ativos de conversão: copy magnética, vídeos e ofertas de alto valor.</p>
-                <div class="mt-6 pt-4 border-t border-white/5 text-right font-mono text-xs text-neutral-600">02 / 05</div>
-            </div>
-
-            <!-- Etapa 3 -->
-            <div class="snap-center shrink-0 w-[280px] sm:w-[340px] glass-card p-8 rounded-2xl border border-white/10 relative">
-                <span class="text-xs font-mono text-brand-red font-bold">FASE 03</span>
-                <h3 class="text-2xl font-display font-bold text-white my-3">AQUISIÇÃO</h3>
-                <p class="text-neutral-400 text-sm">Lançamento de campanhas otimizadas de tráfego direto para tomadores de decisão.</p>
-                <div class="mt-6 pt-4 border-t border-white/5 text-right font-mono text-xs text-neutral-600">03 / 05</div>
-            </div>
-
-            <!-- Etapa 4 -->
-            <div class="snap-center shrink-0 w-[280px] sm:w-[340px] glass-card p-8 rounded-2xl border border-white/10 relative">
-                <span class="text-xs font-mono text-brand-red font-bold">FASE 04</span>
-                <h3 class="text-2xl font-display font-bold text-white my-3">CONVERSÃO</h3>
-                <p class="text-neutral-400 text-sm">Encaminhamento imediato para equipe comercial via atendimento ágil e direcionado.</p>
-                <div class="mt-6 pt-4 border-t border-white/5 text-right font-mono text-xs text-neutral-600">04 / 05</div>
-            </div>
-
-            <!-- Etapa 5 -->
-            <div class="snap-center shrink-0 w-[280px] sm:w-[340px] glass-card p-8 rounded-2xl border border-brand-red/40 bg-brand-red/10 relative">
-                <span class="text-xs font-mono text-brand-red font-bold">FASE 05</span>
-                <h3 class="text-2xl font-display font-bold text-white my-3">RESULTADO</h3>
-                <p class="text-neutral-300 text-sm">Escala previsível com análise constante de ROI e crescimento contínuo.</p>
-                <div class="mt-6 pt-4 border-t border-white/10 text-right font-mono text-xs text-brand-red">05 / 05</div>
-            </div>
-
-        </div>
-    </section>
-
-    <!-- SEÇÃO RESULTADOS -->
-    <section class="py-32 relative" id="resultados">
+    <!-- SEÇÃO RESULTADOS NUMÉRICOS -->
+    <section id="resultados" class="py-28 relative z-10 border-t border-white/10 bg-brand-dark/50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div class="text-center max-w-3xl mx-auto mb-20">
-                <span class="text-xs font-mono uppercase tracking-widest text-brand-red mb-2 block">// Métricas do Negócio</span>
-                <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white leading-tight">
-                    MARKETING PRECISA SER PERCEBIDO.<br>
-                    RESULTADO PRECISA SER MEDIDO.
-                </h2>
-            </div>
-
-            <!-- Indicadores Grandes em Cards Futuristas -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                 
-                <div class="glass-card p-10 rounded-3xl border border-white/10 text-center relative group hover:border-brand-red/50 transition-colors">
-                    <div class="text-5xl sm:text-6xl font-display font-black text-brand-red mb-2 counter" data-target="20">+0</div>
-                    <div class="text-sm font-bold text-white uppercase tracking-wider">Pacientes / Leads Qualificados Por Dia*</div>
-                    <p class="text-xs text-neutral-500 mt-4">Volume contínuo gerado para clínicas e empresas de alto ticket.</p>
+                <div class="tilt-card ultra-glass p-10 rounded-3xl border border-white/10">
+                    <div class="text-5xl font-display font-black text-brand-red mb-2">+20/Dia</div>
+                    <div class="text-xs font-bold text-white uppercase tracking-wider">Leads Qualificados</div>
+                    <p class="text-neutral-500 text-xs mt-2">Volume médio gerado para clientes de saúde e serviços.</p>
                 </div>
 
-                <div class="glass-card p-10 rounded-3xl border border-white/10 text-center relative group hover:border-brand-red/50 transition-colors">
-                    <div class="text-5xl sm:text-6xl font-display font-black text-white mb-2">7 DÍGITOS</div>
-                    <div class="text-sm font-bold text-brand-red uppercase tracking-wider">Geridos em Tráfego Pago*</div>
-                    <p class="text-xs text-neutral-500 mt-4">Experiência acumulada na gestão estratégica de orçamento em anúncios.</p>
+                <div class="tilt-card ultra-glass p-10 rounded-3xl border border-white/10">
+                    <div class="text-5xl font-display font-black text-white mb-2">7 DÍGITOS</div>
+                    <div class="text-xs font-bold text-brand-red uppercase tracking-wider">Geridos em Mídia</div>
+                    <p class="text-neutral-500 text-xs mt-2">Experiência prática na gestão de orçamentos expressivos.</p>
                 </div>
 
-                <div class="glass-card p-10 rounded-3xl border border-white/10 text-center relative group hover:border-brand-red/50 transition-colors">
-                    <div class="text-5xl sm:text-6xl font-display font-black text-white mb-2">+100%</div>
-                    <div class="text-sm font-bold text-white uppercase tracking-wider">Foco em Estratégia e Performance</div>
-                    <p class="text-xs text-neutral-500 mt-4">Sem fórmulas prontas: cada operação recebe direcionamento único.</p>
+                <div class="tilt-card ultra-glass p-10 rounded-3xl border border-white/10">
+                    <div class="text-5xl font-display font-black text-white mb-2">100%</div>
+                    <div class="text-xs font-bold text-white uppercase tracking-wider">Focado em ROI</div>
+                    <p class="text-neutral-500 text-xs mt-2">Sem métricas de vaidade. Nosso foco é faturamento.</p>
                 </div>
 
             </div>
-
-            <div class="mt-12 text-center">
-                <p class="text-xs text-neutral-500 font-mono">
-                    *Resultados variam de acordo com mercado, investimento, estratégia e operação comercial do cliente.
-                </p>
-            </div>
-
         </div>
     </section>
 
-    <!-- PROVA SOCIAL / DEPOIMENTOS DE CLIENTES -->
-    <section class="py-28 relative bg-brand-dark/40 border-t border-white/10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div class="mb-16">
-                <span class="text-xs font-mono uppercase tracking-widest text-brand-red block">// Casos Reais</span>
-                <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white mt-1">
-                    QUANDO O MARKETING COMEÇA A FUNCIONAR, O CLIENTE PERCEBE.
-                </h2>
-            </div>
-
-            <!-- Cards de Depoimentos Assimétricos -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                
-                <div class="glass-card p-8 rounded-3xl border border-white/10 flex flex-col justify-between">
-                    <div class="space-y-4">
-                        <div class="flex text-brand-red gap-1">
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                        </div>
-                        <p class="text-neutral-300 text-sm leading-relaxed">
-                            "Saímos do zero no digital para uma agenda completamente lotada de novos pacientes qualificados todos os meses. A percepção da nossa clínica mudou radicalmente."
-                        </p>
-                    </div>
-                    <div class="mt-8 pt-4 border-t border-white/10 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-neutral-800 border border-white/20 flex items-center justify-center font-bold text-xs text-white">
-                            DR
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-white">Clínica Médica Premium</div>
-                            <div class="text-xs text-neutral-500">Segmento de Saúde</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-8 rounded-3xl border border-brand-red/30 bg-brand-red/5 flex flex-col justify-between">
-                    <div class="space-y-4">
-                        <div class="flex text-brand-red gap-1">
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                        </div>
-                        <p class="text-neutral-200 text-sm leading-relaxed font-medium">
-                            "A MarkePerson entendeu perfeitamente nosso posicionamento. O tráfego pago deles não traz curiosos, traz clientes com orçamento pronto."
-                        </p>
-                    </div>
-                    <div class="mt-8 pt-4 border-t border-white/10 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-brand-red/20 border border-brand-red flex items-center justify-center font-bold text-xs text-brand-red">
-                            B2B
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-white">Empresa de Serviços B2B</div>
-                            <div class="text-xs text-neutral-400">Contratos Corporativos</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card p-8 rounded-3xl border border-white/10 flex flex-col justify-between md:col-span-2 lg:col-span-1">
-                    <div class="space-y-4">
-                        <div class="flex text-brand-red gap-1">
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                            <i data-lucide="star" class="w-4 h-4 fill-brand-red"></i>
-                        </div>
-                        <p class="text-neutral-300 text-sm leading-relaxed">
-                            "O suporte técnico e a clareza dos relatórios mensais nos passam uma tranquilidade enorme. Sabemos exatamente para onde cada real investido está indo."
-                        </p>
-                    </div>
-                    <div class="mt-8 pt-4 border-t border-white/10 flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-neutral-800 border border-white/20 flex items-center justify-center font-bold text-xs text-white">
-                            AG
-                        </div>
-                        <div>
-                            <div class="text-sm font-bold text-white">Grupo de Varejo</div>
-                            <div class="text-xs text-neutral-500">Expansão Regional</div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </section>
-
-    <!-- SOBRE A MARKEPERSON -->
-    <section class="py-28 relative" id="sobre">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            
-            <div class="inline-block p-3 rounded-2xl bg-brand-red/10 border border-brand-red/30 mb-8">
-                <div class="w-12 h-12 rounded-xl bg-brand-red flex items-center justify-center text-white font-display font-extrabold text-2xl mx-auto">
-                    M
-                </div>
-            </div>
-
-            <h2 class="text-3xl sm:text-5xl font-display font-extrabold text-white mb-8">
-                MARKETING NÃO É SÓ APARECER.
+    <!-- CTA FINAL DE IMPACTO -->
+    <section id="contato" class="py-32 relative z-10 overflow-hidden text-center">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+            <h2 class="text-4xl sm:text-7xl font-display font-black text-white leading-tight">
+                PRONTO PARA SER <br>
+                <span class="text-brand-red underline decoration-brand-red/50">PERCEBIDO?</span>
             </h2>
-
-            <div class="space-y-6 text-xl sm:text-2xl font-light text-neutral-300 max-w-3xl mx-auto leading-relaxed">
-                <p>É construir <span class="text-white font-semibold underline decoration-brand-red underline-offset-8">percepção</span> de valor inquestionável.</p>
-                <p>É criar <span class="text-white font-semibold">confiança</span> antes mesmo da primeira conversa.</p>
-                <p>É transformar atenção efêmera em <span class="text-brand-red font-semibold">oportunidade de negócio</span>.</p>
-            </div>
-
-            <div class="mt-12 text-2xl font-display font-bold text-white tracking-widest uppercase">
-                É isso que fazemos na <span class="text-brand-red">MarkePerson</span>.
-            </div>
-
-        </div>
-    </section>
-
-    <!-- PROCESSO DE TRABALHO -->
-    <section class="py-28 border-t border-white/10 bg-brand-dark/20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
-            <div class="text-center max-w-2xl mx-auto mb-20">
-                <span class="text-xs font-mono uppercase tracking-widest text-brand-red block">// Etapas Claras</span>
-                <h2 class="text-3xl sm:text-4xl font-display font-extrabold text-white mt-2">
-                    COMO TRANSFORMAMOS ESTRATÉGIA EM RESULTADO.
-                </h2>
-            </div>
-
-            <!-- Linha de Processo com Conexão Visual -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-                
-                <!-- Etapa 1 -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 relative">
-                    <span class="text-4xl font-display font-black text-brand-red">01</span>
-                    <h3 class="text-xl font-bold text-white mt-4 mb-2">DIAGNÓSTICO</h3>
-                    <p class="text-xs text-neutral-400 leading-relaxed">Analisamos profundamente o momento atual do seu negócio e mapeamos as falhas de conversão.</p>
-                </div>
-
-                <!-- Etapa 2 -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 relative">
-                    <span class="text-4xl font-display font-black text-neutral-600">02</span>
-                    <h3 class="text-xl font-bold text-white mt-4 mb-2">ESTRATÉGIA</h3>
-                    <p class="text-xs text-neutral-400 leading-relaxed">Desenhamos o plano de mídia, direcionamento de conteúdo e definição dos canais de atração.</p>
-                </div>
-
-                <!-- Etapa 3 -->
-                <div class="glass-card p-8 rounded-2xl border border-white/10 relative">
-                    <span class="text-4xl font-display font-black text-neutral-600">03</span>
-                    <h3 class="text-xl font-bold text-white mt-4 mb-2">EXECUÇÃO</h3>
-                    <p class="text-xs text-neutral-400 leading-relaxed">Produção de criativos e subida imediata de campanhas com acompanhamento em tempo real.</p>
-                </div>
-
-                <!-- Etapa 4 -->
-                <div class="glass-card p-8 rounded-2xl border border-brand-red/40 bg-brand-red/5 relative">
-                    <span class="text-4xl font-display font-black text-brand-red">04</span>
-                    <h3 class="text-xl font-bold text-white mt-4 mb-2">OTIMIZAÇÃO</h3>
-                    <p class="text-xs text-neutral-300 leading-relaxed">Ajustes diários, otimização de verba e relatórios transparentes focado em escalabilidade.</p>
-                </div>
-
-            </div>
-
-        </div>
-    </section>
-
-    <!-- CTA FINAL / SEÇÃO DE CONTATO DE ALTO IMPACTO -->
-    <section class="py-36 relative overflow-hidden" id="contato">
-        <!-- Glow de Fundo Vermelho Intenso -->
-        <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-red/25 rounded-full blur-[180px] pointer-events-none"></div>
-
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center space-y-8">
-            
-            <h2 class="text-4xl sm:text-6xl md:text-7xl font-display font-black tracking-tight text-white leading-tight">
-                SEU NEGÓCIO PODE SER <br>
-                MUITO MAIS <span class="text-brand-red underline decoration-brand-red/50">PERCEBIDO.</span>
-            </h2>
-
-            <p class="text-lg sm:text-xl text-neutral-300 font-light max-w-2xl mx-auto">
-                Vamos transformar o seu marketing em uma máquina de retenção e crescimento contínuo?
+            <p class="text-lg text-neutral-400 font-light max-w-xl mx-auto">
+                Sua marca tem o potencial. Nós temos a engenharia para transformar essa atenção em vendas diárias.
             </p>
-
-            <div class="pt-6">
-                <a href="https://wa.me/" target="_blank" class="group inline-flex items-center gap-4 bg-brand-red hover:bg-white text-white hover:text-black font-extrabold text-sm sm:text-base tracking-widest uppercase px-10 py-5 rounded-full transition-all duration-300 shadow-[0_0_50px_rgba(255,11,34,0.6)] hover:shadow-[0_0_60px_rgba(255,255,255,0.8)] hover:scale-105">
-                    <i data-lucide="message-square" class="w-6 h-6"></i>
-                    Falar com um Especialista Agora
-                    <i data-lucide="arrow-right" class="w-5 h-5 group-hover:translate-x-2 transition-transform"></i>
+            <div class="pt-4">
+                <a href="https://wa.me/" target="_blank" class="inline-flex items-center gap-3 bg-brand-red hover:bg-white text-white hover:text-black font-extrabold text-sm uppercase tracking-widest px-10 py-5 rounded-full transition-all duration-300 shadow-[0_0_50px_rgba(255,11,34,0.6)] hover:scale-105">
+                    <i data-lucide="message-square" class="w-5 h-5"></i>
+                    Iniciar Conversa no WhatsApp
                 </a>
             </div>
-
-            <div class="pt-8 text-xs font-mono text-neutral-500 uppercase tracking-widest">
-                Atendimento rápido via WhatsApp • Resposta em poucas horas
-            </div>
-
         </div>
     </section>
 
-    <!-- FOOTER MINIMALISTA -->
-    <footer class="py-12 border-t border-white/10 bg-brand-black text-neutral-400 text-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-            
-            <div class="flex items-center gap-3">
-                <div class="w-7 h-7 rounded-lg bg-brand-red flex items-center justify-center font-display font-bold text-black text-sm">
-                    M
-                </div>
-                <span class="font-display font-bold text-white tracking-wider">MARKE<span class="text-brand-red">PERSON</span></span>
-            </div>
-
-            <p class="text-xs text-neutral-500 text-center md:text-left">
-                Estratégia para ser percebido. Marketing para crescer.
-            </p>
-
-            <div class="flex items-center gap-6 text-xs font-medium">
-                <a href="#inicio" class="hover:text-white transition-colors">Início</a>
-                <a href="#solucoes" class="hover:text-white transition-colors">Soluções</a>
-                <a href="#resultados" class="hover:text-white transition-colors">Resultados</a>
-                <a href="https://instagram.com/markepersondigital" target="_blank" class="text-brand-red hover:underline flex items-center gap-1">
-                    <i data-lucide="instagram" class="w-4 h-4"></i> @markepersondigital
-                </a>
-            </div>
-
-        </div>
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-white/5 text-center text-[10px] text-neutral-600">
-            &copy; 2026 MarkePerson Digital. Todos os direitos reservados.
-        </div>
+    <!-- FOOTER -->
+    <footer class="py-8 border-t border-white/10 text-center text-xs text-neutral-600 font-mono relative z-10">
+        &copy; 2026 MarkePerson Digital. Todos os direitos reservados.
     </footer>
 
-    <!-- JAVASCRIPT CUSTOMIZADO -->
+    <!-- JAVASCRIPT: THREE.JS BACKGROUND + LÓGICA INTERATIVA -->
     <script>
-        // Inicializar Lucide Icons
+        // 1. Inicializar Ícones Lucide
         lucide.createIcons();
 
-        // 1. Menu Mobile Toggle
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const mobileLinks = document.querySelectorAll('.mobile-link');
-        let isMenuOpen = false;
+        // 2. Fundo 3D com Three.js (Partículas Vermelhas Flutuantes em Espaço Tridimensional)
+        const canvas3d = document.getElementById('webgl-bg');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas: canvas3d, alpha: true, antialias: true });
 
-        mobileMenuBtn.addEventListener('click', () => {
-            isMenuOpen = !isMenuOpen;
-            if (isMenuOpen) {
-                mobileMenu.classList.remove('hidden');
-                setTimeout(() => mobileMenu.classList.remove('opacity-0'), 10);
-            } else {
-                mobileMenu.classList.add('opacity-0');
-                setTimeout(() => mobileMenu.classList.add('hidden'), 300);
-            }
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // Criar Geometria de Partículas
+        const particlesCount = 700;
+        const posArray = new Float32Array(particlesCount * 3);
+
+        for (let i = 0; i < particlesCount * 3; i++) {
+            posArray[i] = (Math.random() - 0.5) * 12;
+        }
+
+        const particlesGeometry = new THREE.BufferGeometry();
+        particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+
+        const particlesMaterial = new THREE.PointsMaterial({
+            size: 0.025,
+            color: '#FF0B22',
+            transparent: true,
+            opacity: 0.6
         });
 
-        mobileLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                mobileMenu.classList.add('opacity-0');
-                setTimeout(() => mobileMenu.classList.add('hidden'), 300);
-                isMenuOpen = false;
+        const particlesMesh = new THREE.Points(particlesGeometry, particlesMaterial);
+        scene.add(particlesMesh);
+
+        camera.position.z = 3;
+
+        // Interação com o Mouse no Canvas 3D
+        let mouseX = 0;
+        let mouseY = 0;
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 0.5;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 0.5;
+        });
+
+        function animate3D() {
+            requestAnimationFrame(animate3D);
+            particlesMesh.rotation.y += 0.001;
+            particlesMesh.rotation.x += 0.0005;
+
+            camera.position.x += (mouseX - camera.position.x) * 0.05;
+            camera.position.y += (-mouseY - camera.position.y) * 0.05;
+
+            renderer.render(scene, camera);
+        }
+        animate3D();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // 3. Efeito Tilt 3D com Luz Interna Dinâmica nos Cards
+        document.querySelectorAll('.tilt-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                card.style.setProperty('--mouse-x', `${x}px`);
+                card.style.setProperty('--mouse-y', `${y}px`);
+
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -8;
+                const rotateY = ((x - centerX) / centerX) * 8;
+
+                card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg)';
             });
         });
 
-        // 2. Header Transform ao Rolar a Página
-        const headerContainer = document.getElementById('header-container');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                headerContainer.classList.add('py-2', 'bg-black/80');
-                headerContainer.classList.remove('py-3');
-            } else {
-                headerContainer.classList.add('py-3');
-                headerContainer.classList.remove('py-2', 'bg-black/80');
-            }
-        });
+        // 4. Simulador Interativo de ROI
+        const invRange = document.getElementById('inv-range');
+        const ticketRange = document.getElementById('ticket-range');
+        const invVal = document.getElementById('inv-val');
+        const ticketVal = document.getElementById('ticket-val');
+        const estFaturamento = document.getElementById('est-faturamento');
+        const estLeads = document.getElementById('est-leads');
 
-        // 3. Canvas de Partículas Sutil
-        const canvas = document.getElementById('hero-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+        function updateSimulação() {
+            const inv = parseFloat(invRange.value);
+            const ticket = parseFloat(ticketRange.value);
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+            invVal.innerText = `R$ ${inv.toLocaleString('pt-BR')}`;
+            ticketVal.innerText = `R$ ${ticket.toLocaleString('pt-BR')}`;
 
-        class Particle {
-            constructor() {
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                this.size = Math.random() * 1.5 + 0.5;
-                this.speedX = Math.random() * 0.4 - 0.2;
-                this.speedY = Math.random() * 0.4 - 0.2;
-                this.color = Math.random() > 0.8 ? '#FF0B22' : '#FFFFFF';
-                this.alpha = Math.random() * 0.5 + 0.1;
-            }
-            update() {
-                this.x += this.speedX;
-                this.y += this.speedY;
-                if (this.x < 0) this.x = canvas.width;
-                if (this.x > canvas.width) this.x = 0;
-                if (this.y < 0) this.y = canvas.height;
-                if (this.y > canvas.height) this.y = 0;
-            }
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
+            // Cálculo Estimado (Multiplicador de Performance MarkePerson)
+            const estimativaVendas = Math.round((inv * 4.5) / ticket) * ticket;
+            const estimativaLeads = Math.round((inv * 4.5) / ticket);
+
+            estFaturamento.innerText = `R$ ${estimativaVendas.toLocaleString('pt-BR')},00`;
+            estLeads.innerText = `Aproximadamente ${estimativaLeads} novos clientes fechados/mês`;
         }
 
-        for (let i = 0; i < 40; i++) {
-            particles.push(new Particle());
-        }
+        invRange.addEventListener('input', updateSimulação);
+        ticketRange.addEventListener('input', updateSimulação);
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            particles.forEach(p => {
-                p.update();
-                p.draw();
+        // 5. GSAP ScrollTrigger para Animação dos Elementos na Tela
+        gsap.registerPlugin(ScrollTrigger);
+
+        gsap.utils.toArray('.tilt-card').forEach(card => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: "top 85%",
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                ease: "power3.out"
             });
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
-
-        // 4. Parallax Suave com o Mouse na Hero Zone
-        const interactiveZone = document.getElementById('hero-interactive-zone');
-        if (interactiveZone && window.innerWidth > 768) {
-            interactiveZone.addEventListener('mousemove', (e) => {
-                const rect = interactiveZone.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
-                
-                interactiveZone.style.transform = `perspective(1000px) rotateY(${x * 0.02}deg) rotateX(${-y * 0.02}deg)`;
-            });
-
-            interactiveZone.addEventListener('mouseleave', () => {
-                interactiveZone.style.transform = 'perspective(1000px) rotateY(0deg) rotateX(0deg)';
-            });
-        }
-
-        // 5. Contador de Números Animados
-        const counters = document.querySelectorAll('.counter');
-        let counterTriggered = false;
-
-        window.addEventListener('scroll', () => {
-            const section = document.getElementById('resultados');
-            if (!section) return;
-            const rect = section.getBoundingClientRect();
-            if (rect.top < window.innerHeight && !counterTriggered) {
-                counterTriggered = true;
-                counters.forEach(counter => {
-                    const target = +counter.getAttribute('data-target');
-                    let count = 0;
-                    const speed = 50;
-                    const updateCount = () => {
-                        const increment = target / speed;
-                        if (count < target) {
-                            count += increment;
-                            counter.innerText = `+${Math.ceil(count)}`;
-                            setTimeout(updateCount, 30);
-                        } else {
-                            counter.innerText = `+${target}`;
-                        }
-                    };
-                    updateCount();
-                });
-            }
         });
     </script>
 </body>
